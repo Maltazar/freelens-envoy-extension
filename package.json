@@ -1,6 +1,6 @@
 {
   "name": "@maltazar/freelens-envoy-gateway-extension",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Envoy Gateway policies, proxies and attachment visibility for Freelens 2",
   "repository": {
     "type": "git",
