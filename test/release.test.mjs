@@ -25,22 +25,23 @@ test("release metadata enforces matching immutable versions and separates prerel
   }
 });
 
-test("real extension build packs into a verified installable tarball and portable ZIP", async () => {
+test("real extension build packs and the exact workflow command resolves the downloaded tarball locally", async () => {
   const directory = await mkdtemp(join(tmpdir(), "freelens-release-"));
   try {
     const manifest = JSON.parse(await readFile("package.json", "utf8"));
-    const metadata = await packRelease({ outputDirectory: directory, tag: `v${manifest.version}` });
-    assert.deepEqual((await readdir(directory)).sort(), [metadata.tarball, `${metadata.tarball}.sha256`, metadata.zip, `${metadata.zip}.sha256`].sort());
+    const outputDirectory = join(directory, "artifacts");
+    const metadata = await packRelease({ outputDirectory, tag: `v${manifest.version}` });
+    assert.deepEqual((await readdir(outputDirectory)).sort(), [metadata.tarball, `${metadata.tarball}.sha256`, metadata.zip, `${metadata.zip}.sha256`].sort());
     for (const name of [metadata.tarball, metadata.zip]) {
-      const digest = createHash("sha256").update(await readFile(join(directory, name))).digest("hex");
-      assert.equal(await readFile(join(directory, `${name}.sha256`), "utf8"), `${digest}  ${name}\n`);
+      const digest = createHash("sha256").update(await readFile(join(outputDirectory, name))).digest("hex");
+      assert.equal(await readFile(join(outputDirectory, `${name}.sha256`), "utf8"), `${digest}  ${name}\n`);
     }
-    const entries = unzipSync(await readFile(join(directory, metadata.zip)));
+    const entries = unzipSync(await readFile(join(outputDirectory, metadata.zip)));
     assert.deepEqual(Object.keys(entries).sort(), [metadata.tarball, `${metadata.tarball}.sha256`].sort());
     for (const [name, bytes] of Object.entries(entries)) {
-      assert.deepEqual(Buffer.from(bytes), await readFile(join(directory, name)));
+      assert.deepEqual(Buffer.from(bytes), await readFile(join(outputDirectory, name)));
     }
-    const archive = join(directory, metadata.tarball);
+    const archive = join(outputDirectory, metadata.tarball);
     const packedManifest = JSON.parse(execFileSync("tar", ["-xOf", archive, "package/package.json"], { encoding: "utf8" }));
     assert.equal(packedManifest.name, "@maltazar/freelens-envoy-gateway-extension");
     assert.equal(packedManifest.version, manifest.version);
@@ -54,6 +55,31 @@ test("real extension build packs into a verified installable tarball and portabl
     assert.ok(paths.includes("package/LICENSE"));
     assert.ok(paths.includes("package/README.md"));
     assert.ok(paths.every((path) => !/package\/(?:src|test|node_modules|\.github)\//.test(path)));
+
+    // Exercise the workflow's argument, not an independently corrected publish path.
+    const workflow = await readFile(".github/workflows/release.yml", "utf8");
+    const publishCommand = workflow.match(/^\s+run: (npm publish .+)$/m)?.[1];
+    assert.ok(publishCommand, "Expected the release workflow's npm publish command");
+    const [command, ...args] = [...publishCommand.matchAll(/"([^"]*)"|(\S+)/g)].map((match) =>
+      (match[1] ?? match[2]).replaceAll("$TARBALL", metadata.tarball).replaceAll("$DIST_TAG", metadata.dist_tag),
+    );
+    assert.equal(command, "npm");
+    const published = JSON.parse(execFileSync(command, [...args, "--dry-run", "--json", "--offline"], {
+      cwd: directory, encoding: "utf8", timeout: 30_000,
+      env: {
+        ...process.env,
+        NODE_AUTH_TOKEN: "", NPM_TOKEN: "",
+        NPM_CONFIG_USERCONFIG: join(directory, "no-user-npmrc"),
+        NPM_CONFIG_GLOBALCONFIG: join(directory, "no-global-npmrc"),
+        NPM_CONFIG_CACHE: join(directory, "npm-cache"),
+        NPM_CONFIG_UPDATE_NOTIFIER: "false",
+        GIT_SSH_COMMAND: "false",
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+    }));
+    assert.equal(published[manifest.name].name, manifest.name);
+    assert.equal(published[manifest.name].version, manifest.version);
+    assert.equal(published[manifest.name].integrity, `sha512-${createHash("sha512").update(await readFile(archive)).digest("base64")}`);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

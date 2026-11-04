@@ -150,13 +150,13 @@ The filenames use the version being released. A prerelease such as `0.2.0-rc.1` 
 
 Only the GitHub release job has `contents: write`; it uses GitHub's built-in token, so no personal access token is required. The optional npm job runs afterwards, uses the **same checked tarball**, installs no project dependencies, and has only read access plus OIDC permission. Release jobs do not use dependency caches.
 
-Do not move published tags or reuse npm versions. If a job fails, rerun **only failed jobs** in Actions; successfully created releases and published npm versions are intentionally not overwritten. If the code needs a fix, publish a new version/tag.
+Do not move published tags or reuse npm versions. For transient failures or corrected account/environment settings, rerun **only failed jobs** in Actions; successfully created releases and published npm versions are intentionally not overwritten. A rerun still uses the workflow from the original tag, so a workflow/code fix needs a new version/tag.
 
 ### Enable package-name installation: one-time npm setup
 
 GitHub release downloads work without this setup. To enable installation by `@maltazar/freelens-envoy-gateway-extension`, you must own the **`@maltazar` npm scope** and publish the package publicly. Public npm publication exposes the package contents even if the GitHub repository is private.
 
-1. Leave the repository variable **`PUBLISH_TO_NPM`** unset for the first GitHub release. Download its `.tgz` asset, sign into your npm account locally using `npm login`, and publish that exact file with `npm publish artifacts/maltazar-freelens-envoy-gateway-extension-0.1.0.tgz --access public --ignore-scripts` (place the downloaded file in `artifacts/`, or use its actual local path). Complete authentication/2FA directly in your terminal/browser; do not put credentials in the repository. This initial publish creates the package whose settings hold the trusted publisher configuration.
+1. Leave the repository variable **`PUBLISH_TO_NPM`** unset for the first GitHub release. Download its `.tgz` asset, sign into your npm account locally using `npm login`, and publish that exact file with `npm publish ./artifacts/maltazar-freelens-envoy-gateway-extension-0.1.0.tgz --access public --ignore-scripts` (place the downloaded file in `artifacts/`, or use its actual local path). Keep the leading `./`: npm can interpret a bare `artifacts/name.tgz` argument as a GitHub repository shorthand instead of a local file. Complete authentication/2FA directly in your terminal/browser; do not put credentials in the repository. This initial publish creates the package whose settings hold the trusted publisher configuration.
 2. In GitHub, create an environment named **`npm`** under **Settings → Environments**. Optionally require maintainer approval and allow only release tags for deployment.
 3. In the npm package's **Settings → Trusted publishing**, add a GitHub Actions publisher with these exact values:
 
