@@ -1,0 +1,37 @@
+.envoy-page { padding: 28px; overflow: auto; height: 100%; color: var(--textColorPrimary); }
+.envoy-header { margin-bottom: 24px; }
+.envoy-header h1 { font-size: 28px; margin: 8px 0; font-weight: 600; }
+.envoy-eyebrow { color: var(--primary); font-size: 11px; letter-spacing: 0.14em; font-weight: 600; }
+.envoy-muted { opacity: 0.72; line-height: 1.5; }
+.envoy-notice { padding: 14px 16px; border-left: 3px solid var(--primary); background: var(--contentColor); margin: 12px 0 20px; overflow-wrap: anywhere; }
+.envoy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.envoy-card { padding: 20px; background: var(--contentColor); border: 1px solid var(--borderColor); border-radius: 8px; }
+.envoy-card-title { color: var(--primary); font: inherit; font-size: 17px; font-weight: 600; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
+.envoy-card-title:hover { text-decoration: underline; }
+.envoy-card p { margin: 10px 0; }
+.envoy-count { font-size: 36px; line-height: 1.1; font-weight: 600; margin-top: 20px; }
+.envoy-counts { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 14px 0; }
+.envoy-status { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; background: color-mix(in srgb, currentColor 12%, transparent); white-space: nowrap; }
+.envoy-status-accepted { color: var(--colorOk, #389b73); }
+.envoy-status-attention { color: var(--colorError, #d95363); }
+.envoy-status-pending { color: var(--colorWarning, #b27b12); }
+.envoy-status-unknown, .envoy-status-not-reported { opacity: 0.72; }
+.envoy-list { height: 100%; display: flex; flex-direction: column; }
+.envoy-resource-table { flex: 1; min-height: 0; }
+.envoy-resource-table .envoy-name-cell { flex: 1.2; }
+.envoy-resource-table .envoy-namespace-cell { flex: 0.8; }
+.envoy-resource-table .envoy-targets-cell { flex: 2; }
+.envoy-resource-table .envoy-settings-cell { flex: 1.5; }
+.envoy-resource-table .envoy-status-cell { flex: 0 0 110px; }
+.envoy-resource-table .envoy-age-cell { flex: 0 0 65px; }
+.envoy-details p { margin: 8px 0; overflow-wrap: anywhere; }
+.envoy-details h3 { font-weight: 600; margin: 12px 0 8px; }
+.envoy-condition-group, .envoy-related-group { margin: 12px 0 18px; }
+.envoy-condition { border-left: 2px solid var(--borderColor); padding: 8px 12px; margin: 8px 0; }
+.envoy-setting { margin: 8px 0; border: 1px solid var(--borderColor); border-radius: 4px; }
+.envoy-setting summary { padding: 10px; cursor: pointer; font-weight: 600; }
+.envoy-setting pre { padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; max-height: 500px; overflow: auto; }
+.envoy-related-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px 0; }
+.envoy-related-row small { flex-basis: 100%; }
+.envoy-button { padding: 6px 12px; margin-top: 10px; border: 1px solid var(--borderColor); border-radius: 4px; background: var(--contentColor); color: var(--textColorPrimary); cursor: pointer; }
+.envoy-button:focus-visible, .envoy-card-title:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
